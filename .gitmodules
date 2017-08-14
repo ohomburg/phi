@@ -1,0 +1,18 @@
+[submodule "vendor/glfw"]
+	path = vendor/glfw
+	url = https://github.com/glfw/glfw.git
+[submodule "vendor/nuklear"]
+	path = vendor/nuklear
+	url = https://github.com/vurtun/nuklear.git
+[submodule "vendor/stb"]
+	path = vendor/stb
+	url = https://github.com/nothings/stb.git
+[submodule "vendor/glm"]
+	path = vendor/glm
+	url = https://github.com/g-truc/glm.git
+[submodule "vendor/glew"]
+	path = vendor/glew
+	url = https://github.com/Perlmint/glew-cmake.git
+[submodule "vendor/Remotery"]
+	path = vendor/Remotery
+	url = https://github.com/Celtoys/Remotery.git
