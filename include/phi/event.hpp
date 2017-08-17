@@ -3,12 +3,15 @@
 #include <vector>
 #include <memory>
 #include <functional>
+#include "features.hpp"
+
+struct nk_context;
 
 namespace phi {
     namespace event {
         struct Event {
             enum class Type {
-                APPLICATION, KEYBOARD, MOUSE
+                APPLICATION, KEYBOARD, MOUSE, COMMAND
             } type;
 
             explicit Event(Type type) : type(type) {}
@@ -25,6 +28,12 @@ namespace phi {
             RawMB(int button, int action, int mods) : Event(Type::MOUSE), button(button), action(action), mods(mods) {}
 
             int button, action, mods;
+        };
+
+        struct Command : public Event {
+            Command(std_string_view cmd) : Event(Type::COMMAND), cmd(cmd) {}
+
+            std_string_view cmd;
         };
     }
 
@@ -46,5 +55,9 @@ namespace phi {
         void event(const event::Event &ev);
 
         void registerHandler(EventHandler &e);
+
+        void swap();
+
+        nk_context *nuklear();
     };
 }

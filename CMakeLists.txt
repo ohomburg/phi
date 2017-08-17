@@ -12,9 +12,9 @@ include_directories(include)
 add_executable(phigame ${SOURCE_FILES})
 
 add_library(phi engine/engine.cpp)
-add_library(phicore engine/core/empty.cpp)
+add_library(phicore engine/core/tf.cpp)
 add_library(phisys engine/sys/event.cpp)
-add_library(phigl engine/gl/empty.cpp)
+add_library(phigl engine/gl/shader.cpp)
 add_library(phirender engine/render/compositor.cpp)
 #add_library(phiphys)
 
@@ -47,7 +47,13 @@ endif ()
 
 set(CMAKE_CXX_STANDARD 17)
 
+if (CMAKE_COMPILER_IS_GNUCXX)
+    set(CMAKE_CXX_FLAGS "-std=c++17")
+endif ()
+
 ### Dependencies
+
+include_directories(vendor)
 
 add_definitions(-DRMT_USE_OPENGL=1)
 add_library(remotery vendor/Remotery/lib/Remotery.c)
@@ -76,6 +82,6 @@ include_directories(vendor/glm)
 target_link_libraries(phisys glfw remotery)
 target_link_libraries(phigl glfw ${GLFW_LIBRARIES} libglew_static)
 target_link_libraries(phirender phigl)
-target_link_libraries(phi phisys phirender phicore)
+target_link_libraries(phi phisys phirender phigl phicore)
 
 target_link_libraries(phigame phi)
