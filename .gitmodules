@@ -16,3 +16,9 @@
 [submodule "vendor/Remotery"]
 	path = vendor/Remotery
 	url = https://github.com/Celtoys/Remotery.git
+[submodule "vendor/json"]
+	path = vendor/json
+	url = https://github.com/nlohmann/json
+[submodule "vendor/fx-gltf"]
+	path = vendor/fx-gltf
+	url = https://github.com/jessey-git/fx-gltf

@@ -1,5 +1,8 @@
-cmake_minimum_required(VERSION 3.8)
+cmake_minimum_required(VERSION 3.11)
 project(phi)
+
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 ### Sources
 
@@ -43,12 +46,6 @@ if (WIN32)
         target_link_libraries(phigame debug -mconsole)
         target_link_libraries(phigame optimized -mwindows)
     endif ()
-endif ()
-
-set(CMAKE_CXX_STANDARD 17)
-
-if (CMAKE_COMPILER_IS_GNUCXX)
-    set(CMAKE_CXX_FLAGS "-std=c++17")
 endif ()
 
 ### Dependencies
