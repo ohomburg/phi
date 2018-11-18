@@ -1,7 +1,15 @@
 #include <phi/render.hpp>
+#include <phi/engine.hpp>
 #include <GL/glew.h>
+#include <glm/glm.hpp>
+#include <glm/gtc/type_ptr.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#define GLM_ENABLE_EXPERIMENTAL
+#include <glm/gtx/string_cast.hpp>
 #include <Remotery.h>
 #include <phi/opengl.hpp>
+#include <fstream>
+#include <string>
 
 #define NK_INCLUDE_FIXED_TYPES
 #define NK_INCLUDE_STANDARD_IO
@@ -13,93 +21,81 @@
 
 #include <nuklear/nuklear.h>
 #include <nuklear/demo/glfw_opengl3/nuklear_glfw_gl3.h>
+#include <iostream>
 
-using namespace std;
+using std::vector;
+using namespace std::literals;
 using namespace phi;
 using namespace phi::render;
 using namespace phi::gl;
 
-static vector<ShaderStage> mk_shader(std_string_view vs, std_string_view fs) {
+static ShaderStage load_shader_stage(const std::string &filename) {
+    std::string ext = filename.substr(filename.find_last_of('.') + 1);
+    GLenum type;
+    if (ext == "vert")
+        type = GL_VERTEX_SHADER;
+    else if (ext == "frag")
+        type = GL_FRAGMENT_SHADER;
+    else if (ext == "geom")
+        type = GL_GEOMETRY_SHADER;
+    else if (ext == "comp")
+        type = GL_COMPUTE_SHADER;
+    else if (ext == "tesc")
+        type = GL_TESS_CONTROL_SHADER;
+    else if (ext == "tese")
+        type = GL_TESS_EVALUATION_SHADER;
+    else
+        type = GL_VERTEX_SHADER;
+
+    std::ifstream ifs(g_assets + "/shader/"s + filename);
+    std::string contents{std::istreambuf_iterator<char>(ifs), std::istreambuf_iterator<char>()};
+
+    return ShaderStage{type, std::vector{std_string_view(contents)}};
+}
+
+static vector<ShaderStage> load_shader(const std::string &name) {
     vector<ShaderStage> output;
-    output.push_back(ShaderStage(GL_VERTEX_SHADER, vector<std_string_view>{vs}));
-    if (!output.back()) { throw runtime_error("Shader compilation failed:\n" + output.back().infoLog()); }
-    output.push_back(ShaderStage(GL_FRAGMENT_SHADER, vector<std_string_view>{fs}));
-    if (!output.back()) { throw runtime_error("Shader compilation failed:\n" + output.back().infoLog()); }
+    output.push_back(load_shader_stage(name + ".vert"));
+    output.push_back(load_shader_stage(name + ".frag"));
     return output;
 }
 
-static constexpr std_string_view simple_vs = R"EOF(
-#version 430
-
-layout(location = 0) in vec2 in_position;
-
-void main() {
-    gl_Position = vec4(in_position * 0.5, 0, 1);
-}
-
-)EOF"sv, simple_fs = R"EOF(
-#version 430
-
-out vec3 color;
-
-void main() {
-    color = vec3(1, 0, 0);
-}
-)EOF"sv;
-
-class Quad {
-    GLuint VBO{}, VAO{};
-public:
-    Quad() {
-        glGenBuffers(1, &VBO);
-        glGenVertexArrays(1, &VAO);
-        glBindVertexArray(VAO);
-
-        const GLfloat vertex_data[] = {
-                1, 1, -1, 1, 1, -1, -1, -1
-        };
-
-        glBindBuffer(GL_ARRAY_BUFFER, VBO);
-        glBufferData(GL_ARRAY_BUFFER, sizeof(vertex_data), vertex_data, GL_STATIC_DRAW);
-
-        glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(GLfloat), (void *) nullptr);
-        glEnableVertexAttribArray(0);
-    }
-
-    void drawCall() {
-        glBindVertexArray(VAO);
-        glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-    }
-};
-
-class SimpleShader : public Shader {
-public:
-    SimpleShader() : Shader(mk_shader(simple_vs, simple_fs)) {}
-};
-
 struct Compositor::Impl {
-    explicit Impl(Window &window) : window(window) {
-        if (!simpleShader) throw runtime_error("Shader compile failed:\n" + simpleShader.infoLog());
+    explicit Impl(Window &window) : window(window), shader(load_shader("solid")) {
+        if (!shader) throw std::runtime_error("Shader compile failed:\n" + shader.infoLog());
     }
 
     Window &window;
-    SimpleShader simpleShader;
-    Quad quad;
+    Shader shader;
+    Cube cube;
 };
 
 void Compositor::render() {
-    rmt_ScopedCPUSample(Render, 0);
-    rmt_ScopedOpenGLSample(Render);
-    glClearColor(0, 0.5, 0.5, 1);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    {
+        rmt_ScopedCPUSample(Render, 0);
+        rmt_ScopedOpenGLSample(Render);
+        glClearColor(0, 0.5, 0.5, 1);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    glDisable(GL_BLEND);
+        glDisable(GL_BLEND);
+        glDisable(GL_CULL_FACE);
 
-    impl->simpleShader.bind();
-    impl->quad.drawCall();
+        impl->shader.bind();
+        glm::mat4 model(1.f);
+        glm::vec3 eye{0, 0, 5};
+        glm::vec3 center{0, 0, 0};
+        glm::mat4 cameraTransform = glm::translate(glm::mat4(1.f), eye);
+        glm::mat4 viewProject =
+                glm::perspective(glm::radians(68.f), impl->window.aspect(), 0.1f, 1000.f) * glm::inverse(cameraTransform);
+        //std::cout << glm::to_string(viewProject) << '\n';
+        glUniformMatrix4fv(0, 1, GL_FALSE, glm::value_ptr(model));
+        glUniformMatrix4fv(1, 1, GL_FALSE, glm::value_ptr(viewProject));
 
-    const int MAX_VERTEX_BUFFER = 512 * 1024, MAX_ELEMENT_BUFFER = 128 * 1024;
-    nk_glfw3_render(NK_ANTI_ALIASING_ON, MAX_VERTEX_BUFFER, MAX_ELEMENT_BUFFER);
+        impl->cube.drawCall();
+
+        const int MAX_VERTEX_BUFFER = 512 * 1024, MAX_ELEMENT_BUFFER = 128 * 1024;
+        nk_glfw3_render(NK_ANTI_ALIASING_ON, MAX_VERTEX_BUFFER, MAX_ELEMENT_BUFFER);
+    }
 
     impl->window.swap();
 }
@@ -107,7 +103,7 @@ void Compositor::render() {
 void Compositor::handle(const phi::event::Event &ev) {
 }
 
-Compositor::Compositor(Window &window) : impl(make_unique<Impl>(window)) {
+Compositor::Compositor(Window &window) : impl(std::make_unique<Impl>(window)) {
 }
 
 Compositor::~Compositor() = default;

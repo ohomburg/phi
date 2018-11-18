@@ -47,9 +47,9 @@ phi::gl::ShaderStage::~ShaderStage() {
 std::string phi::gl::ShaderStage::infoLog() const {
     int len;
     glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &len);
-    auto log = std::make_unique<char[]>((size_t) len + 1);
-    glGetShaderInfoLog(shader, len + 1, &len, log.get());
-    return std::string(log.get(), (size_t) len);
+    std::string log((size_t) len, '#');
+    glGetShaderInfoLog(shader, len + 1, &len, log.data());
+    return log;
 }
 
 phi::gl::Shader::Shader(const std::vector<ShaderStage> &stages) {

@@ -1,7 +1,12 @@
 #include <phi/engine.hpp>
+#include <iostream>
 
-void phi::Engine::run() {
-    while (window.pumpEvents()) {
-        compositor.render();
-    }
+const char *phi::g_assets = "###";
+
+phi::Engine::Engine() : window() {
+}
+
+bool phi::Engine::run() {
+    compositor.render();
+    return window.pumpEvents();
 }

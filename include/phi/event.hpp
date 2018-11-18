@@ -58,6 +58,8 @@ namespace phi {
 
         void swap();
 
+        float aspect();
+
         nk_context *nuklear();
     };
 }

@@ -88,9 +88,9 @@ phi::Window::Window() {
 }
 
 phi::Window::~Window() {
-    rmt_UnbindOpenGL();
+    //rmt_UnbindOpenGL();
     glfwTerminate();
-    rmt_DestroyGlobalInstance(impl->rmt);
+    //rmt_DestroyGlobalInstance(impl->rmt);
 }
 
 bool phi::Window::pumpEvents() {
@@ -115,4 +115,10 @@ void phi::Window::swap() {
 
 nk_context *phi::Window::nuklear() {
     return impl->nuklear;
+}
+
+float phi::Window::aspect() {
+    int w, h;
+    glfwGetWindowSize(impl->window, &w, &h);
+    return (float) w / (float) h;
 }

@@ -18,7 +18,7 @@ add_library(phi engine/engine.cpp)
 add_library(phicore engine/core/tf.cpp)
 add_library(phisys engine/sys/event.cpp)
 add_library(phigl engine/gl/shader.cpp)
-add_library(phirender engine/render/compositor.cpp)
+add_library(phirender engine/render/compositor.cpp engine/render/mesh.cpp engine/render/mesh.hpp)
 #add_library(phiphys)
 
 ### Compiler and Linker settings
