@@ -67,10 +67,9 @@ struct Compositor::Impl {
 
     Window &window;
     Shader shader;
-    Cube cube;
 };
 
-void Compositor::render() {
+void Compositor::render(std::vector<Renderable> &&objs) {
     {
         rmt_ScopedCPUSample(Render, 0);
         rmt_ScopedOpenGLSample(Render);
@@ -81,17 +80,18 @@ void Compositor::render() {
         glDisable(GL_CULL_FACE);
 
         impl->shader.bind();
-        glm::mat4 model(1.f);
         glm::vec3 eye{0, 0, 5};
         glm::vec3 center{0, 0, 0};
         glm::mat4 cameraTransform = glm::translate(glm::mat4(1.f), eye);
         glm::mat4 viewProject =
                 glm::perspective(glm::radians(68.f), impl->window.aspect(), 0.1f, 1000.f) * glm::inverse(cameraTransform);
-        //std::cout << glm::to_string(viewProject) << '\n';
-        glUniformMatrix4fv(0, 1, GL_FALSE, glm::value_ptr(model));
         glUniformMatrix4fv(1, 1, GL_FALSE, glm::value_ptr(viewProject));
 
-        impl->cube.drawCall();
+        for(auto &renderable : objs) {
+            glm::mat4 model = renderable.tf.transform();
+            glUniformMatrix4fv(0, 1, GL_FALSE, glm::value_ptr(model));
+            renderable.mesh->drawCall();
+        }
 
         const int MAX_VERTEX_BUFFER = 512 * 1024, MAX_ELEMENT_BUFFER = 128 * 1024;
         nk_glfw3_render(NK_ANTI_ALIASING_ON, MAX_VERTEX_BUFFER, MAX_ELEMENT_BUFFER);
@@ -107,3 +107,5 @@ Compositor::Compositor(Window &window) : impl(std::make_unique<Impl>(window)) {
 }
 
 Compositor::~Compositor() = default;
+
+Renderable::~Renderable() = default;

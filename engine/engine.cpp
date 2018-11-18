@@ -6,7 +6,9 @@ const char *phi::g_assets = "###";
 phi::Engine::Engine() : window() {
 }
 
-bool phi::Engine::run() {
-    compositor.render();
-    return window.pumpEvents();
+void phi::Engine::run() {
+    while (window.pumpEvents()) {
+        update();
+        compositor.render(render());
+    }
 }

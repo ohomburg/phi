@@ -7,6 +7,11 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 ### Sources
 
 set(SOURCE_FILES main.cpp)
+set(ENGINE_SOURCES engine/engine.cpp)
+set(CORE_SOURCES engine/core/tf.cpp)
+set(SYS_SOURCES engine/sys/event.cpp)
+set(PHIGL_SOURCES engine/gl/shader.cpp)
+set(RENDER_SOURCES engine/render/compositor.cpp engine/render/mesh.cpp)
 
 include_directories(include)
 
@@ -14,11 +19,7 @@ include_directories(include)
 
 add_executable(phigame ${SOURCE_FILES})
 
-add_library(phi engine/engine.cpp)
-add_library(phicore engine/core/tf.cpp)
-add_library(phisys engine/sys/event.cpp)
-add_library(phigl engine/gl/shader.cpp)
-add_library(phirender engine/render/compositor.cpp engine/render/mesh.cpp engine/render/mesh.hpp)
+add_library(phi ${ENGINE_SOURCES} ${CORE_SOURCES} ${SYS_SOURCES} ${PHIGL_SOURCES} ${RENDER_SOURCES})
 #add_library(phiphys)
 
 ### Compiler and Linker settings
@@ -76,9 +77,6 @@ include_directories(${GLEW_INCLUDE_DIRS})
 
 include_directories(vendor/glm)
 
-target_link_libraries(phisys glfw remotery)
-target_link_libraries(phigl glfw ${GLFW_LIBRARIES} libglew_static)
-target_link_libraries(phirender phigl)
-target_link_libraries(phi phisys phirender phigl phicore)
+target_link_libraries(phi remotery glfw ${GLFW_LIBRARIES} libglew_static)
 
 target_link_libraries(phigame phi)

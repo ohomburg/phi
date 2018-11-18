@@ -2,8 +2,21 @@
 
 #include <memory>
 #include "event.hpp"
+#include "core.hpp"
 
 namespace phi::render {
+    struct Mesh {
+        virtual ~Mesh() = default;
+        virtual void drawCall() = 0;
+    };
+
+    struct Renderable {
+        phi::Transform tf{};
+        std::shared_ptr<Mesh> mesh;
+
+        ~Renderable();
+    };
+
     class Compositor : public EventHandler {
         struct Impl;
         std::unique_ptr<Impl> impl;
@@ -12,41 +25,13 @@ namespace phi::render {
 
         ~Compositor();
 
-        void render();
+        void render(std::vector<Renderable> &&objs);
 
         void handle(const event::Event &ev) override;
     };
 
-    class Quad {
-        struct Impl;
-        std::unique_ptr<Impl> impl;
-    public:
-        ~Quad();
-
-        Quad();
-
-        void drawCall();
-    };
-
-    class IcoSphere {
-        struct Impl;
-        std::unique_ptr<Impl> impl;
-    public:
-        ~IcoSphere();
-
-        IcoSphere();
-
-        void drawCall();
-    };
-
-    class Cube {
-        struct Impl;
-        std::unique_ptr<Impl> impl;
-    public:
-        ~Cube();
-
-        Cube();
-
-        void drawCall();
-    };
+    namespace factory {
+        std::shared_ptr<Mesh> cube();
+        std::shared_ptr<Mesh> icoSphere();
+    }
 }
