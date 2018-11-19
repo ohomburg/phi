@@ -1,5 +1,5 @@
-#include <phi/render.hpp>
 #include <GL/glew.h>
+#include <phi/render.hpp>
 #include "mesh_definitions.h"
 
 using namespace phi;

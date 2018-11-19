@@ -1,7 +1,8 @@
-#include <phi/event.hpp>
 #include <GL/glew.h>
+#include <phi/event.hpp>
 #include <GLFW/glfw3.h>
 #include <Remotery.h>
+#include <cstring>
 
 #define NK_INCLUDE_FIXED_TYPES
 #define NK_INCLUDE_STANDARD_IO
