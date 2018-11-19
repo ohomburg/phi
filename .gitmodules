@@ -3,7 +3,7 @@
 	url = https://github.com/glfw/glfw.git
 [submodule "vendor/nuklear"]
 	path = vendor/nuklear
-	url = https://github.com/vurtun/nuklear.git
+	url = https://github.com/vurtun/nuklear
 [submodule "vendor/stb"]
 	path = vendor/stb
 	url = https://github.com/nothings/stb.git
@@ -15,10 +15,7 @@
 	url = https://github.com/Perlmint/glew-cmake.git
 [submodule "vendor/Remotery"]
 	path = vendor/Remotery
-	url = https://github.com/Celtoys/Remotery.git
-[submodule "vendor/json"]
-	path = vendor/json
-	url = https://github.com/nlohmann/json
+	url = https://github.com/Celtoys/Remotery
 [submodule "vendor/fx-gltf"]
 	path = vendor/fx-gltf
 	url = https://github.com/jessey-git/fx-gltf
